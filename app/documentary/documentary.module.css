@@ -1,29 +1,76 @@
+/* Rebuild of the original Format documentary page: full-width lead image, a
+   6/6 video-with-text row, then a 2-column masonry image set. */
+
 .page {
-  max-width: var(--maxw-content);
+  /* Same Format row box as the work case studies: measured 188/1064 at 1440
+     and 38/692 at 768 off the original captures. */
+  max-width: var(--maxw-case);
   margin: 0 auto;
-  padding: var(--section-pt) var(--gutter) var(--space-md);
+  padding: var(--section-pt) 38px var(--space-md);
 }
+
 .lead {
   width: 100%;
   height: auto;
-  margin-bottom: 40px;
+  display: block;
 }
-.body {
-  max-width: var(--maxw-read);
+
+/* --- video with text (original: _4ORMAT_module_video_with_text_04, sixcol +
+   sixcol last — text left, video right) --- */
+.videoRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--doc-gap);
+  align-items: start;
+  margin-top: var(--doc-gap);
 }
-.body :global(h2) {
+
+.copy :global(h2) {
+  margin: 0 0 0.5em;
   font-family: var(--font-display);
   font-weight: 300;
   font-size: var(--fs-display);
-  margin: 0 0 0.5em;
+  line-height: var(--lh-snug);
+  color: var(--text-bright);
 }
+.copy :global(p) {
+  margin: 0 0 1.25em;
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: var(--text);
+}
+.copy :global(p:last-child) {
+  margin-bottom: 0;
+}
+
+/* --- masonry image set: two landscapes stacked in one column, one portrait
+   in the other. Equal gutter on both axes, natural aspect ratios, no
+   per-image positioning (the original used absolutely-placed JS masonry). --- */
 .stills {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-top: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--doc-gap);
+  align-items: start;
+  margin-top: var(--doc-gap);
+}
+.stack {
+  display: grid;
+  gap: var(--doc-gap);
+  align-content: start;
 }
 .stills img {
   width: 100%;
   height: auto;
+  display: block;
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+  .videoRow,
+  .stills {
+    grid-template-columns: 1fr;
+  }
 }

@@ -32,6 +32,7 @@
   /* Spacing */
   --gutter: 20px;
   --section-pt: 52px;
+  --doc-gap: 45px; /* documentary video row + masonry gutter, both axes */
   --space-sm: 10px;
   --space-md: 50px;
   --space-lg: 90px;
