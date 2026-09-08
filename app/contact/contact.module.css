@@ -1,0 +1,16 @@
+.page {
+  min-height: 60dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--section-pt) var(--gutter);
+}
+.email {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-title);
+  color: var(--text);
+}
+.email:hover {
+  color: var(--text-bright);
+}

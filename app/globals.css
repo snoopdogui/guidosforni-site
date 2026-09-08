@@ -1,0 +1,111 @@
+/* ------------------------------------------------------------------ *
+ * Design tokens — reverse-engineered from guidosforni.com (Format)
+ * via getComputedStyle across 1440 / 768 / 390.  Monochrome warm-gray
+ * on black; two type families (display + text).
+ * ------------------------------------------------------------------ */
+:root {
+  /* Palette */
+  --bg: #000000;
+  --text: #9b9999; /* primary — ~7.6:1 on black (AA) */
+  --text-bright: #d7cccc; /* hover / emphasis */
+  --text-dim: #808080; /* de-emphasized — lifted from original #444 to ~5:1 (AA fix) */
+
+  /* Fonts (wired up in layout.jsx via next/font) */
+  --font-display: var(--font-hanken), system-ui, sans-serif; /* ≈ Forma DJR Display */
+  --font-text: var(--font-franklin), system-ui, sans-serif; /* ≈ Benton Sans */
+
+  /* Type scale (px) */
+  --fs-body: 16px;
+  --fs-read: 18px; /* long-form body */
+  --fs-intro: 19.2px;
+  --fs-nav: 22px;
+  --fs-caption: 24px;
+  --fs-title: 27px; /* listing titles (display) */
+  --fs-display: 28px; /* section display (display) */
+
+  /* Line heights */
+  --lh-tight: 1.2;
+  --lh-snug: 1.4;
+  --lh-body: 1.5;
+  --lh-read: 1.7;
+
+  /* Spacing */
+  --gutter: 20px;
+  --section-pt: 52px;
+  --space-sm: 10px;
+  --space-md: 50px;
+  --space-lg: 90px;
+
+  /* Layout */
+  --maxw-content: 1000px;
+  --maxw-case: 1140px; /* work case studies only — Format's row box width */
+  --maxw-read: 780px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover {
+  color: var(--text-bright);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Display type helpers */
+.display {
+  font-family: var(--font-display);
+  font-weight: 300;
+}
+
+/* Long-form reading column (blog / writing) */
+.prose {
+  max-width: var(--maxw-read);
+  font-size: var(--fs-read);
+  line-height: var(--lh-read);
+  letter-spacing: -0.18px;
+}
+.prose h1,
+.prose h2,
+.prose h3 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  line-height: var(--lh-snug);
+}
+.prose p {
+  margin: 0 0 1.4em;
+}
+
+/* Utility: page content wrapper */
+.wrapper {
+  max-width: var(--maxw-content);
+  margin: 0 auto;
+  padding: var(--section-pt) var(--gutter) var(--space-md);
+}

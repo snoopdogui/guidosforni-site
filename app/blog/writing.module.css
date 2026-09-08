@@ -1,0 +1,31 @@
+.list {
+  max-width: var(--maxw-read);
+  margin: 0 auto;
+  padding: var(--section-pt) var(--gutter) var(--space-md);
+}
+.heading {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-display);
+  margin: 0 0 40px;
+}
+.item {
+  padding: 22px 0;
+  border-top: 1px solid #1a1a1a;
+}
+.title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-title);
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+.title:hover {
+  color: var(--text-bright);
+}
+.date {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+}

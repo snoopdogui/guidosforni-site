@@ -1,0 +1,93 @@
+/* Film-roll carousel: one image per snap-locked slide, focus falling off with
+   distance from centre. No sprocket holes, no grain — deliberately omitted. */
+
+.roll {
+  /* 781px is the original Format strip height, which is what capped the tall
+     (portrait) frames in the old GalleryFilmstrip. */
+  --roll-h: min(781px, calc(100dvh - 190px));
+
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  /* the strip is the whole surface; hide the bar but keep it scrollable */
+  scrollbar-width: none;
+}
+.roll::-webkit-scrollbar {
+  display: none;
+}
+
+/* While a wheel-driven lerp is running we drive scrollLeft ourselves, so
+   mandatory snap has to stand down or it fights the animation every frame. */
+.freeScroll {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+
+.slide {
+  flex: 0 0 100%;
+  height: var(--roll-h);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  display: grid;
+  place-items: center;
+  padding: 0 var(--gutter);
+  box-sizing: border-box;
+}
+
+.frame {
+  /* --d is the slide's distance from centre, 0 (centred) to 1 (a viewport
+     away), written per-frame from JS so the falloff is continuous. */
+  --d: 1;
+
+  /* Display at natural size, scaled down only to respect the caps below —
+     never stretched to fill the slide. The caps reproduce the old
+     GalleryFilmstrip's sizing: landscape frames sat at 50vw (720px at 1440,
+     384px at 768) and portrait frames at the 781px strip height. Whichever
+     cap binds first wins; the aspect ratio follows from width/height auto,
+     so no object-fit is involved. */
+  width: auto;
+  height: auto;
+  max-width: min(50vw, 720px);
+  /* a definite length, not 100%: a percentage max-height doesn't resolve
+     against the centred grid area here, so tall frames overflowed the slide */
+  max-height: var(--roll-h);
+  opacity: calc(1 - 0.68 * var(--d));
+  filter: blur(calc(var(--d) * var(--d) * 7px));
+  transform: scale(calc(1 - 0.05 * var(--d)));
+  /* no CSS transition: the value is already continuous from the scroll handler,
+     and a transition would lag behind the finger */
+  will-change: opacity, filter, transform;
+}
+
+.counter {
+  margin: 18px auto 0;
+  max-width: var(--maxw-content);
+  padding: 0 var(--gutter);
+  font-size: 13px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Below the desktop breakpoint the old layout let frames run wider than the
+   viewport inside a scrolling canvas; here a slide is the viewport, so fit. */
+@media (max-width: 767px) {
+  .frame {
+    max-width: 85vw; /* the old layout's mobile width (331px at 390) */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roll {
+    scroll-behavior: auto;
+  }
+  .frame {
+    filter: none;
+    transform: none;
+    opacity: calc(1 - 0.4 * var(--d));
+    will-change: auto;
+  }
+}

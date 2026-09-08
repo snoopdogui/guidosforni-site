@@ -1,0 +1,174 @@
+/* Reusable building blocks for /work case studies.
+   Reproduces Format's row model: a stack of independent rows, each capped at
+   --maxw-case with 36px of vertical padding (so 72px between adjacent rows),
+   holding children on a 12-column percentage grid — column 5.217%,
+   gutter 3.4%, giving fourcol 31.06% / eightcol 65.54% / twelvecol 100%. */
+
+.row {
+  max-width: var(--maxw-case);
+  margin: 0 auto;
+  /* 38px / 28px rather than --gutter: measured off the original captures, where
+     the content box is 1064px wide starting at x=188 (1440), 692px at x=38
+     (768) and 334px at x=28 (390). The Format theme CSS that produced this
+     inset was never scraped, so these come from the screenshots, not source. */
+  padding: 36px 38px;
+}
+
+.cols {
+  display: grid;
+  column-gap: 3.4%;
+  row-gap: 28px;
+  align-items: start;
+}
+.split48 {
+  grid-template-columns: 31.06% 65.54%;
+}
+.split84 {
+  grid-template-columns: 65.54% 31.06%;
+}
+
+/* Format's images are already cropped to their slot's aspect ratio server-side,
+   so the image only needs to fill its column — no object-fit, no ratio box. */
+.media {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* --- Page title / subtitle. Distinct from section headings on purpose: the
+   scraped source made all three an h2, which is the bug this fixes. --- */
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(28px, 2.9vw, 42px);
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+  color: var(--text-bright);
+}
+.titleMd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-caption);
+  line-height: 1.25;
+  color: var(--text-bright);
+}
+.subtitleBody {
+  margin: 12px 0 0;
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: var(--text);
+}
+.subtitle {
+  margin: 14px 0 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  color: var(--text);
+}
+
+/* --- Section heading + body --- */
+.section + .section {
+  margin-top: 30px;
+}
+.heading {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-caption);
+  line-height: 1.25;
+  color: var(--text-bright);
+}
+.body p {
+  margin: 0 0 1.25em;
+  font-size: var(--fs-body);
+  line-height: 1.7; /* Format's own markup carried leading-[1.7] */
+  color: var(--text);
+}
+.body p:last-child {
+  margin-bottom: 0;
+}
+/* In-content links were underlined on the original; the global reset removes
+   underlines site-wide, so put them back inside case-study copy. */
+.body a,
+.headline a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --- Column insets, as percentages of the row's content box ---
+   inset  = 8col between 2col spacers  (2col 13.83% + 3.4% gutter each side)
+   narrow = 6col between 3col spacers  (3col 22.45% + 3.4% gutter each side) */
+/* Declared before .inset/.narrow: <figure> carries .figure alongside .inset,
+   and a `margin: 0` shorthand later in the file would win on source order and
+   kill the centring. The centring below uses longhands for the same reason. */
+.figure {
+  margin: 0;
+}
+.inset {
+  width: 65.54%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.narrow {
+  width: 48.3%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.caption {
+  margin-top: 18px;
+}
+
+/* --- Centred headline / pull-line row --- */
+.headline {
+  text-align: center;
+}
+.headline p {
+  margin: 0 0 0.6em;
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: var(--text);
+}
+.headline p:last-child {
+  margin-bottom: 0;
+}
+.pull p {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--text-bright);
+}
+
+.center {
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .row {
+    padding: 36px 28px;
+  }
+  .inset,
+  .narrow {
+    width: 100%;
+  }
+  .split48,
+  .split84 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Back-to-index nav (site chrome; the original Format page had none) --- */
+.pageNav {
+  margin-top: var(--space-lg);
+}
+.back {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.back:hover {
+  color: var(--text-bright);
+}

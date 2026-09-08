@@ -1,0 +1,28 @@
+.page {
+  max-width: var(--maxw-read);
+  margin: 0 auto;
+  padding: var(--section-pt) var(--gutter) var(--space-md);
+}
+.head {
+  margin-bottom: 30px;
+}
+.date {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+/* First heading in the essay is its title */
+.page :global(.prose h1) {
+  font-size: var(--fs-display);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  margin: 0 0 0.6em;
+}
+.pageNav {
+  margin-top: var(--space-lg);
+}
+.back {
+  color: var(--text-dim);
+}
+.back:hover {
+  color: var(--text-bright);
+}

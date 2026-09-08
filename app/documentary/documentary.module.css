@@ -1,0 +1,29 @@
+.page {
+  max-width: var(--maxw-content);
+  margin: 0 auto;
+  padding: var(--section-pt) var(--gutter) var(--space-md);
+}
+.lead {
+  width: 100%;
+  height: auto;
+  margin-bottom: 40px;
+}
+.body {
+  max-width: var(--maxw-read);
+}
+.body :global(h2) {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-display);
+  margin: 0 0 0.5em;
+}
+.stills {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 40px;
+}
+.stills img {
+  width: 100%;
+  height: auto;
+}

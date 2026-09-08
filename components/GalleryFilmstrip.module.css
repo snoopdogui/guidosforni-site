@@ -1,0 +1,44 @@
+.scroller {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.track {
+  position: relative;
+}
+
+.asset {
+  position: absolute;
+  object-fit: cover;
+}
+
+/* Show only the track for the current breakpoint range */
+.bp1440 {
+  display: none;
+}
+.bp768 {
+  display: none;
+}
+.bp390 {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .bp390 {
+    display: none;
+  }
+  .bp768 {
+    display: block;
+  }
+}
+
+@media (min-width: 1280px) {
+  .bp768 {
+    display: none;
+  }
+  .bp1440 {
+    display: block;
+  }
+}
