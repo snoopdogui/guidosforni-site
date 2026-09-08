@@ -2,9 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { GALLERIES, getGallery } from '../../../lib/content';
 import { imagesFor } from '../../../lib/server-content';
-import GalleryFilmstrip, { placedFiles } from '../../../components/GalleryFilmstrip';
 import FilmRoll from '../../../components/FilmRoll';
-import { galleryFiles } from '../../../lib/gallery';
+import { galleryFiles, placedFiles } from '../../../lib/gallery';
 import styles from './gallery.module.css';
 
 export function generateStaticParams() {
@@ -17,10 +16,6 @@ export function generateMetadata({ params }) {
 }
 
 const base = (p) => p.split('/').pop();
-
-// Galleries migrated to the film-roll viewer. The rest still use the original
-// scatter filmstrip until they're moved over.
-const FILM_ROLL = new Set(['transcendence']);
 
 export default function GalleryPage({ params }) {
   const g = getGallery(params.slug);
@@ -39,11 +34,7 @@ export default function GalleryPage({ params }) {
 
   return (
     <article className={styles.page}>
-      {FILM_ROLL.has(g.slug) ? (
-        <FilmRoll files={galleryFiles(g.slug)} title={g.title} />
-      ) : (
-        <GalleryFilmstrip gallerySlug={g.slug} title={g.title} />
-      )}
+      <FilmRoll files={galleryFiles(g.slug)} title={g.title} />
 
       {extras.length > 0 && (
         <div className={styles.extras}>
