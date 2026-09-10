@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { GALLERIES, getGallery } from '../../../lib/content';
 import { imagesFor } from '../../../lib/server-content';
-import FilmRoll from '../../../components/FilmRoll';
-import { galleryFiles, placedFiles } from '../../../lib/gallery';
+import GalleryViewer from '../../../components/GalleryViewer';
+import { galleryFiles, placedFiles, teaserFile } from '../../../lib/gallery';
 import styles from './gallery.module.css';
 
 export function generateStaticParams() {
@@ -24,17 +24,20 @@ export default function GalleryPage({ params }) {
   const idx = GALLERIES.findIndex((x) => x.slug === g.slug);
   const next = GALLERIES[(idx + 1) % GALLERIES.length];
 
-  // Any downloaded image for this gallery not placed in the scatter canvas.
-  // On the old site the extra is the next-gallery teaser thumbnail; render it
-  // in the "Next" link so every downloaded asset is used and reachable.
+  // The trailing frame of this gallery's captured strip is a preview of the
+  // NEXT gallery, so it belongs to the "Next" link rather than to this
+  // gallery's own film roll or grid.
+  const teaserName = teaserFile(g.slug);
+  const teaser = teaserName ? `/images/${teaserName}` : null;
+
+  // Any downloaded image for this gallery that no view uses at all (currently
+  // none) — cheap insurance against a re-scrape adding files.
   const placed = placedFiles(g.slug);
-  const leftovers = imagesFor(`archive-${g.slug}`).filter((src) => !placed.has(base(src)));
-  const teaser = leftovers[0] || null;
-  const extras = leftovers.slice(1);
+  const extras = imagesFor(`archive-${g.slug}`).filter((src) => !placed.has(base(src)));
 
   return (
     <article className={styles.page}>
-      <FilmRoll files={galleryFiles(g.slug)} title={g.title} />
+      <GalleryViewer files={galleryFiles(g.slug)} title={g.title} />
 
       {extras.length > 0 && (
         <div className={styles.extras}>
