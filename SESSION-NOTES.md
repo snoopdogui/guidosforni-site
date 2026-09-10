@@ -45,8 +45,13 @@ Design system (reverse-engineered via getComputedStyle across 1440/768/390):
   / `--border-hover` / `--border-active` / `--surface` / `--rule`.
   `--maxw-content: 1000px` (site-wide), `--maxw-case: 1140px` (work case
   studies, gallery viewer, documentary).
-- Fonts via `next/font`: **Libre Franklin** (≈ Benton Sans) + **Hanken Grotesk**
-  (≈ Forma DJR) — free look-alikes, no licensing.
+- Fonts via `next/font/local`: **JMH Typewriter Dry** (Thin 300 / Regular 400 /
+  Bold 700 / Black 900) from `app/fonts/`. It replaced the earlier free Google
+  look-alikes (Libre Franklin / Hanken Grotesk) and is a **deliberate departure
+  from the original site's Benton Sans / Forma DJR sans**, not an approximation
+  of it. Note both `--font-display` and `--font-text` now resolve to this one
+  family — the two variables are vestigial, so the display/text distinction is
+  nominal. ⚠️ Licensing: see TODO 1.
 - `components/Header` (sticky; inline nav ≥768px, hamburger overlay below),
   `components/Footer`.
 
@@ -219,26 +224,31 @@ Redirects (`next.config.mjs`): legacy numeric URLs (`/14358097` etc.) → `/arch
 
 ## NOT done yet (known TODOs)
 
-1. **Image optimization** — `next.config.mjs` has `images.unoptimized: true` and
+1. **⚠️ Font licensing — blocks going live.** The JMH Typewriter Dry files in
+   `app/fonts/` ship under a **Personal Use Only** licence (see the comment in
+   `app/layout.jsx`). They are currently served to every visitor via
+   `next/font/local`. Buy a web licence, or swap the family, before this is
+   public.
+2. **Image optimization** — `next.config.mjs` has `images.unoptimized: true` and
    images are the raw 3–5 MB scraped originals (209 MB across 96 files in
    `public/images`), including three 1.2–2.3 MB writing-list thumbnails. Grid mode now loads every image in a gallery at once, so
    this bites harder than it used to. Before production: enable Next/Vercel
    image optimization or add a resize/compress step, and switch `<img>` →
    `next/image` where sensible.
-2. **Lightbox / zoom** — no fullscreen or zoomed view in either mode. Grid mode
+3. **Lightbox / zoom** — no fullscreen or zoomed view in either mode. Grid mode
    partly covers "see everything at once", but there's still no way to view a
    single image larger than its frame.
-3. **The arium's "Full concept deck" is dead text** — the original linked a
+4. **The arium's "Full concept deck" is dead text** — the original linked a
    Format-hosted PDF (`4ormat-asset.s3.amazonaws.com/…/the-arium.pdf`) that was
    never scraped. Download it into `public/` and re-point the link.
-4. **Two work date ranges are inferred, not confirmed** — see the comment above
+5. **Two work date ranges are inferred, not confirmed** — see the comment above
    `WORKS` in `lib/content.js`. Only the arium states a date in its markdown.
-5. **The Vimeo embed returns 401** — `player.vimeo.com/video/769580233` is
+6. **The Vimeo embed returns 401** — `player.vimeo.com/video/769580233` is
    rejected regardless of referer or user agent (the vimeo.com page itself is
    200), so the documentary video will not play until its embed privacy is
    changed on Vimeo, or an unlisted hash (`&h=…`) is added to the URL. The
    click-to-play mechanism itself is verified working.
-6. **Text proofreading** — body text is auto-extracted from scraped markdown via
+7. **Text proofreading** — body text is auto-extracted from scraped markdown via
    a minimal md→html renderer (`lib/markdown.js`). Not proofread; essay
    bibliographies especially need a pass. Case-study and gallery images now have
    real `alt` text, but blog/documentary/archive-listing images do not.
@@ -267,9 +277,12 @@ Redirects (`next.config.mjs`): legacy numeric URLs (`/14358097` etc.) → `/arch
    on first load it statically shows item #1's cover until you hover.
 7. **Header treatment** — original inner pages used a hamburger even on desktop;
    the rebuild shows full inline nav on desktop (deliberate a11y improvement).
-8. **Fonts are approximations** — Libre Franklin / Hanken Grotesk are close but
-   not identical to Benton Sans / Forma DJR; the letter-spaced "GUIDO SFORNI"
-   wordmark is hand-tuned, not exact.
+8. **The typeface no longer matches the original** — the site now sets JMH
+   Typewriter Dry for both display and body, where guidosforni.com used a
+   Benton Sans / Forma DJR sans. That is a design decision, not a fidelity gap,
+   so the "verified against original screenshots" claims elsewhere in this file
+   hold for geometry and sizing but no longer for letterforms. Confirm this is
+   intended. The letter-spaced "GUIDO SFORNI" wordmark is hand-tuned either way.
 
 ---
 

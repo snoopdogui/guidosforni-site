@@ -1,7 +1,8 @@
 /* ------------------------------------------------------------------ *
  * Design tokens — reverse-engineered from guidosforni.com (Format)
- * via getComputedStyle across 1440 / 768 / 390.  Monochrome warm-gray
- * on black; two type families (display + text).
+ * via getComputedStyle across 1440 / 768 / 390.  Monochrome warm-gray;
+ * dark (default) + light palettes via [data-theme].  One type family
+ * (JMH Typewriter Dry) now fills both the display and text roles.
  * ------------------------------------------------------------------ */
 :root {
   /* Palette — dark is the default and the original design.
@@ -23,8 +24,10 @@
   color-scheme: dark;
 
   /* Fonts (wired up in layout.jsx via next/font) */
-  --font-display: var(--font-hanken), system-ui, sans-serif; /* ≈ Forma DJR Display */
-  --font-text: var(--font-franklin), system-ui, sans-serif; /* ≈ Benton Sans */
+  /* Both resolve to JMH Typewriter Dry (see layout.jsx) — the display/text
+     split is vestigial, kept so call sites don't all have to change. */
+  --font-display: var(--font-hanken), system-ui, sans-serif;
+  --font-text: var(--font-franklin), system-ui, sans-serif;
 
   /* Type scale (px) */
   --fs-body: 16px;
