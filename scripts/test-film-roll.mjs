@@ -7,6 +7,7 @@
  *   sizing   — no frame upscaled beyond its natural size or overflowing its slide
  *   snap     — a gesture settles exactly on a frame, never half-between two
  *   falloff  — the --d focus value varies continuously with scroll position
+ *   grid     — masonry mode: uniform column width, nothing cropped, no overlaps
  *   feel     — (optional, --flicks) characterises gentle/moderate/hard gestures
  *
  * It cannot judge feel. It measures that the implementation behaves as
@@ -159,6 +160,40 @@ const FALLOFF = `(async () => {
            first: rows[0][1], last: rows.at(-1)[1] };
 })()`;
 
+// Grid mode: switch to it, then check the masonry actually holds together.
+const GRID = `(async () => {
+  const btn = [...document.querySelectorAll('button')].find(b => /Grid/.test(b.textContent));
+  if (!btn) return { error: 'no grid toggle' };
+  btn.click();
+  await new Promise(r => setTimeout(r, 400));
+  const g = document.querySelector('ul[aria-label*="images"]');
+  if (!g) return { error: 'grid did not render' };
+  const cells = [...g.querySelectorAll('button')];
+  const imgs = cells.map(c => c.querySelector('img'));
+  imgs.forEach(i => { i.loading = 'eager'; });
+  await Promise.all(imgs.map(i => i.complete ? 1 : new Promise(r => { i.onload = r; i.onerror = r; })));
+  await new Promise(r => requestAnimationFrame(r));
+  const boxes = cells.map(c => { const b = c.getBoundingClientRect();
+    return { l: Math.round(b.left), t: Math.round(b.top), r: Math.round(b.right),
+             bo: Math.round(b.bottom), w: Math.round(b.width) }; });
+  // cropping: rendered aspect must match the file's own aspect
+  const cropped = imgs.map((im, i) => {
+    const b = im.getBoundingClientRect();
+    return { i, off: +Math.abs(im.naturalWidth / im.naturalHeight - b.width / b.height).toFixed(3),
+             fit: getComputedStyle(im).objectFit };
+  }).filter(x => x.off > 0.02 || x.fit === 'cover');
+  let overlaps = 0;
+  for (let a = 0; a < boxes.length; a++) for (let b = a + 1; b < boxes.length; b++) {
+    const A = boxes[a], B = boxes[b];
+    if (A.l < B.r && B.l < A.r && A.t < B.bo && B.t < A.bo) overlaps++;
+  }
+  const widths = [...new Set(boxes.map(b => b.w))];
+  return { cells: cells.length, columns: [...new Set(boxes.map(b => b.l))].length,
+    colWidths: widths, cropped, overlaps,
+    broken: imgs.filter(i => i.naturalWidth === 0).length,
+    highlighted: cells.findIndex(c => c.getAttribute('aria-current') === 'true') };
+})()`;
+
 const FLICKS = {
   'nudge': [4, 7, 9, 6, 3],
   'gentle': [6, 12, 20, 24, 20, 12, 6],
@@ -236,6 +271,7 @@ for (const slug of targets) {
   const size = await cdp.evaluate(SIZING);
   if (size.error) { console.log(`${slug.padEnd(15)} FAIL  ${size.error}`); failures++; continue; }
   const fall = await cdp.evaluate(FALLOFF);
+  const grid = await cdp.evaluate(GRID);
 
   const bad = [];
   if (size.upscaled.length) bad.push(`upscaled:${size.upscaled}`);
@@ -244,6 +280,15 @@ for (const slug of targets) {
   if (size.snapType !== 'x mandatory') bad.push(`snapType:${size.snapType}`);
   if (fall.maxDJump > 0.06) bad.push(`falloffJump:${fall.maxDJump}`);
   if (fall.nonMonotonic > 0) bad.push(`falloffNonMono:${fall.nonMonotonic}`);
+  if (grid.error) bad.push(`grid:${grid.error}`);
+  else {
+    if (grid.cells !== size.count) bad.push(`gridCount:${grid.cells}!=${size.count}`);
+    if (grid.cropped.length) bad.push(`gridCropped:${JSON.stringify(grid.cropped)}`);
+    if (grid.overlaps) bad.push(`gridOverlaps:${grid.overlaps}`);
+    if (grid.broken) bad.push(`gridBroken:${grid.broken}`);
+    const w = grid.colWidths || [];
+    if (w.length > 2 || Math.max(...w) - Math.min(...w) > 2) bad.push(`gridColW:${w}`);
+  }
   if (consoleErrors.length) bad.push(`console:${consoleErrors.length}`);
   if (bad.length) failures++;
 
@@ -251,7 +296,8 @@ for (const slug of targets) {
     `${slug.padEnd(15)} ${bad.length ? 'FAIL' : ' ok '}  ` +
     `n=${String(size.count).padStart(2)} (${size.landscapes}L/${size.portraits}P)  ` +
     `slide=${size.box.w}x${size.box.h}  w=${size.widths.join(',')}  h=${size.heights.join(',')}  ` +
-    `falloff(maxJump=${fall.maxDJump},nonMono=${fall.nonMonotonic})` +
+    `falloff(${fall.maxDJump},${fall.nonMonotonic})  ` +
+    `grid(${grid.error ? grid.error : `${grid.cells}cells/${grid.columns}col/${grid.colWidths.join('|')}px`})` +
     (bad.length ? `  << ${bad.join(' ')}` : '')
   );
   if (consoleErrors.length) consoleErrors.forEach((e) => console.log(`                 console: ${e}`));

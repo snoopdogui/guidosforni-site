@@ -1,0 +1,47 @@
+/* Owns the scroll/grid mode switch for a gallery. */
+
+.toolbar {
+  max-width: var(--maxw-case);
+  margin: 18px auto 0;
+  padding: 0 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.counter {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  appearance: none;
+  background: none;
+  border: 1px solid #2a2a2a;
+  border-radius: 2px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.toggle:hover {
+  color: var(--text-bright);
+  border-color: #4a4a4a;
+}
+.toggle svg {
+  display: block;
+}
+
+@media (max-width: 767px) {
+  .toolbar {
+    padding: 0 28px;
+  }
+}

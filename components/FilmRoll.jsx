@@ -29,10 +29,22 @@ const COMMIT_FRACTION = 0.15;
 // gate on starting to move, not a threshold applied after moving.
 const DEAD_DELTA = 40;
 
-export default function FilmRoll({ files, title }) {
+// initialIndex   frame to open on (grid mode uses this to hand back a position)
+// onActiveChange fires when the centred frame changes, so a parent can mirror it
+// showCounter    the "NN / NN" readout; off when a parent renders it in a toolbar
+export default function FilmRoll({
+  files,
+  title,
+  initialIndex = 0,
+  onActiveChange,
+  showCounter = true,
+}) {
   const rollRef = useRef(null);
   const framesRef = useRef([]);
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(initialIndex);
+  const activeRef = useRef(initialIndex);
+  const onActive = useRef(onActiveChange);
+  onActive.current = onActiveChange;
 
   // wheel-lerp state
   const target = useRef(0);
@@ -71,8 +83,47 @@ export default function FilmRoll({ files, title }) {
       }
     });
 
-    setActive(nearest);
+    if (nearest !== activeRef.current) {
+      activeRef.current = nearest;
+      setActive(nearest);
+      onActive.current?.(nearest);
+    }
   }, []);
+
+  // Where the roll has to sit for frame `i` to be centred. Same expression the
+  // settle logic uses for its snap stops — kept as a separate helper so the
+  // tuned settle path stays exactly as it was.
+  const stopFor = useCallback((i) => {
+    const roll = rollRef.current;
+    const frame = framesRef.current[i];
+    if (!roll || !frame) return null;
+    const slide = frame.parentElement;
+    return slide.offsetLeft + slide.offsetWidth / 2 - roll.clientWidth / 2;
+  }, []);
+
+  // Open on initialIndex. Instant, not a glide from frame 0 — and it lands on
+  // an exact snap stop, so mandatory snap has nothing to correct.
+  //
+  // Read through a ref and run once per mount on purpose. A parent that mirrors
+  // onActiveChange back into initialIndex would otherwise re-fire this on every
+  // scroll and yank the roll to the nearest frame mid-gesture.
+  const openAt = useRef(initialIndex);
+  useEffect(() => {
+    const roll = rollRef.current;
+    const want = openAt.current;
+    if (!roll || !want) return;
+    const dest = stopFor(want);
+    if (dest == null) return;
+    const prev = roll.style.scrollBehavior;
+    roll.style.scrollBehavior = 'auto';
+    roll.scrollLeft = Math.max(0, Math.min(dest, roll.scrollWidth - roll.clientWidth));
+    roll.style.scrollBehavior = prev;
+    current.current = roll.scrollLeft;
+    target.current = roll.scrollLeft;
+    activeRef.current = want;
+    paint();
+    // stopFor/paint are stable (useCallback with [] deps), so this runs once
+  }, [stopFor, paint]);
 
   useEffect(() => {
     const roll = rollRef.current;
@@ -298,9 +349,11 @@ export default function FilmRoll({ files, title }) {
           </div>
         ))}
       </div>
-      <p className={styles.counter} aria-live="off">
-        {String(active + 1).padStart(2, '0')} / {String(files.length).padStart(2, '0')}
-      </p>
+      {showCounter && (
+        <p className={styles.counter} aria-live="off">
+          {String(active + 1).padStart(2, '0')} / {String(files.length).padStart(2, '0')}
+        </p>
+      )}
     </>
   );
 }

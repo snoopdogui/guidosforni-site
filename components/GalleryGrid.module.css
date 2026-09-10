@@ -1,0 +1,68 @@
+/* Masonry contact sheet: consistent column width, natural aspect ratio per
+   image, nothing cropped, ragged bottom edge accepted. Full clarity — the
+   dim/blur falloff belongs to scroll mode only.
+
+   CSS multi-column rather than a JS-measured layout, to keep this in the same
+   plain-CSS idiom as the rest of the site. Note the consequence: columns fill
+   top-to-bottom, so the visual reading order is column-major (down column 1,
+   then column 2), not left-to-right across rows. */
+
+.grid {
+  max-width: var(--maxw-case);
+  margin: 0 auto;
+  padding: 8px 28px 0;
+  column-count: 2;
+  column-gap: 12px;
+  list-style: none;
+}
+
+.cell {
+  margin: 0 0 12px;
+  break-inside: avoid; /* never split an image across a column boundary */
+}
+
+.pick {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  appearance: none;
+  line-height: 0; /* no descender gap under the image */
+}
+.pick:hover {
+  border-color: #4a4a4a;
+}
+.pick:focus-visible {
+  outline: 1px solid var(--text-bright);
+  outline-offset: 2px;
+}
+
+/* the frame scroll mode is currently centred on */
+.current {
+  border-color: var(--text-bright);
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  height: auto; /* natural aspect ratio, never cropped */
+}
+
+@media (min-width: 768px) {
+  .grid {
+    padding: 8px 38px 0;
+    column-count: 3;
+    column-gap: 18px;
+  }
+  .cell {
+    margin-bottom: 18px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid {
+    column-count: 4;
+  }
+}
