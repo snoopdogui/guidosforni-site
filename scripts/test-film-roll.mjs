@@ -7,7 +7,8 @@
  *   sizing   — no frame upscaled beyond its natural size or overflowing its slide
  *   snap     — a gesture settles exactly on a frame, never half-between two
  *   falloff  — the --d focus value varies continuously with scroll position
- *   grid     — masonry mode: uniform column width, nothing cropped, no overlaps
+ *   grid     — masonry mode: uniform column width, nothing cropped, no
+ *              overlaps. Skipped when SHOW_GRID_MODE is off (no toggle).
  *   feel     — (optional, --flicks) characterises gentle/moderate/hard gestures
  *
  * It cannot judge feel. It measures that the implementation behaves as
@@ -163,7 +164,9 @@ const FALLOFF = `(async () => {
 // Grid mode: switch to it, then check the masonry actually holds together.
 const GRID = `(async () => {
   const btn = [...document.querySelectorAll('button')].find(b => /Grid/.test(b.textContent));
-  if (!btn) return { error: 'no grid toggle' };
+  // Grid mode is behind lib/flags.js SHOW_GRID_MODE. Absent toggle == feature
+  // switched off, which is a skip, not a failure.
+  if (!btn) return { skipped: 'grid mode hidden' };
   btn.click();
   await new Promise(r => setTimeout(r, 400));
   const g = document.querySelector('ul[aria-label*="images"]');
@@ -280,7 +283,8 @@ for (const slug of targets) {
   if (size.snapType !== 'x mandatory') bad.push(`snapType:${size.snapType}`);
   if (fall.maxDJump > 0.06) bad.push(`falloffJump:${fall.maxDJump}`);
   if (fall.nonMonotonic > 0) bad.push(`falloffNonMono:${fall.nonMonotonic}`);
-  if (grid.error) bad.push(`grid:${grid.error}`);
+  if (grid.skipped) { /* feature flagged off — nothing to assert */ }
+  else if (grid.error) bad.push(`grid:${grid.error}`);
   else {
     if (grid.cells !== size.count) bad.push(`gridCount:${grid.cells}!=${size.count}`);
     if (grid.cropped.length) bad.push(`gridCropped:${JSON.stringify(grid.cropped)}`);
@@ -297,7 +301,7 @@ for (const slug of targets) {
     `n=${String(size.count).padStart(2)} (${size.landscapes}L/${size.portraits}P)  ` +
     `slide=${size.box.w}x${size.box.h}  w=${size.widths.join(',')}  h=${size.heights.join(',')}  ` +
     `falloff(${fall.maxDJump},${fall.nonMonotonic})  ` +
-    `grid(${grid.error ? grid.error : `${grid.cells}cells/${grid.columns}col/${grid.colWidths.join('|')}px`})` +
+    `grid(${grid.skipped ? 'skipped: ' + grid.skipped : grid.error ? grid.error : `${grid.cells}cells/${grid.columns}col/${grid.colWidths.join('|')}px`})` +
     (bad.length ? `  << ${bad.join(' ')}` : '')
   );
   if (consoleErrors.length) consoleErrors.forEach((e) => console.log(`                 console: ${e}`));

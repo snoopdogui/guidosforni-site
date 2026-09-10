@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import GalleryViewer from './GalleryViewer';
+import { SHOW_GRID_MODE } from '../lib/flags';
 import styles from './GalleryScreen.module.css';
 
 const VIEW_PARAM = 'view';
@@ -19,6 +20,7 @@ export default function GalleryScreen({ files, title, next, children }) {
   const [mode, setMode] = useState('roll');
 
   useEffect(() => {
+    if (!SHOW_GRID_MODE) return;
     const view = new URLSearchParams(window.location.search).get(VIEW_PARAM);
     if (view === 'grid') setMode('grid');
   }, []);
@@ -53,11 +55,6 @@ export default function GalleryScreen({ files, title, next, children }) {
         <Link href="/archive" className={styles.back}>
           ‹ Archive
         </Link>
-        {next && (
-          <Link href={nextHref} className={styles.nextPage}>
-            Next: {next.title} ›
-          </Link>
-        )}
       </nav>
     </>
   );

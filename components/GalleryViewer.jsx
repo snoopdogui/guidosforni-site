@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import Link from 'next/link';
+import { SHOW_GRID_MODE } from '../lib/flags';
 import FilmRoll from './FilmRoll';
 import GalleryGrid from './GalleryGrid';
 import styles from './GalleryViewer.module.css';
@@ -79,26 +80,32 @@ export default function GalleryViewer({
             : `${files.length} images`}
         </p>
         <div className={styles.actions}>
-          {/* Roll mode only. The roll is up to 781px tall and its wheel handler
-              claims vertical scroll, so the nav at the foot of the page is hard
-              to reach from here; grid mode scrolls normally and already has it. */}
-          {showingRoll && nextHref && (
+          {/* The only next-gallery link on the page. It lives here rather than
+              in the nav row below because the roll is up to 781px tall and its
+              wheel handler claims vertical scroll, which makes the foot of the
+              page hard to reach. Deliberately not gated on the view mode, so it
+              survives grid mode being switched back on. */}
+          {nextHref && (
             <Link href={nextHref} className={styles.nextLink}>
               Next: {nextTitle} ›
             </Link>
           )}
-          <button
-            type="button"
-            className={styles.toggle}
-            onClick={() => onModeChange?.(showingRoll ? 'grid' : 'roll')}
-            aria-label={
-              showingRoll ? 'Show all images as a grid' : 'Show images as a scrolling roll'
-            }
-            title={showingRoll ? 'Grid' : 'Roll'}
-          >
-            {showingRoll ? <GridIcon /> : <RollIcon />}
-            {showingRoll ? 'Grid' : 'Roll'}
-          </button>
+
+          {/* Grid toggle — hidden behind SHOW_GRID_MODE, not deleted. */}
+          {SHOW_GRID_MODE && (
+            <button
+              type="button"
+              className={styles.toggle}
+              onClick={() => onModeChange?.(showingRoll ? 'grid' : 'roll')}
+              aria-label={
+                showingRoll ? 'Show all images as a grid' : 'Show images as a scrolling roll'
+              }
+              title={showingRoll ? 'Grid' : 'Roll'}
+            >
+              {showingRoll ? <GridIcon /> : <RollIcon />}
+              {showingRoll ? 'Grid' : 'Roll'}
+            </button>
+          )}
         </div>
       </div>
     </>
