@@ -39,10 +39,12 @@ node scripts/test-film-roll.mjs --flicks transcendence
 ## Current state — built & verified
 
 Design system (reverse-engineered via getComputedStyle across 1440/768/390):
-- Tokens in `app/globals.css`: black `#000` bg, warm-gray text `#9b9999`,
-  bright `#d7cccc`, dim `#808080` (lifted from original `#444` for AA), type
-  scale, spacing. `--maxw-content: 1000px` (site-wide),
-  `--maxw-case: 1140px` (work case studies + gallery viewer only).
+- Tokens in `app/globals.css`. Dark is the original design and the default:
+  black `#000` bg, warm-gray text `#9b9999`, bright `#d7cccc`, dim `#808080`
+  (lifted from the original `#444` for AA), plus non-text tones `--border`
+  / `--border-hover` / `--border-active` / `--surface` / `--rule`.
+  `--maxw-content: 1000px` (site-wide), `--maxw-case: 1140px` (work case
+  studies, gallery viewer, documentary).
 - Fonts via `next/font`: **Libre Franklin** (≈ Benton Sans) + **Hanken Grotesk**
   (≈ Forma DJR) — free look-alikes, no licensing.
 - `components/Header` (sticky; inline nav ≥768px, hamburger overlay below),
@@ -60,6 +62,38 @@ Routes (all prerender):
 | `/blog` | Listing | 3 essays: circular thumbnail + title + date |
 | `/blog/[slug]` | Essay | 780px prose column |
 | `/contact` | Page | mailto link |
+
+### Theming — light / dark
+
+Swapped via a `data-theme` attribute on `<html>`; **never** a CSS filter or
+invert, which would wreck every photograph on the site.
+
+- Dark palette under `:root`, light under `[data-theme='light']`. Each light
+  value was *solved* to hit the same measured contrast ratio against the light
+  background that its dark counterpart hits against black — not inverted:
+  `--text` 7.41:1, `--text-bright` 13.4:1, `--text-dim` 5.31:1, and matching
+  border/rule tones. Light `--bg` is `#f4f2f1` (warm off-white, not white).
+- ⚠️ `--surface` is a deliberate exception: mirroring its ratio would land it
+  *lighter* than the page, but an image placeholder must read as recessed on a
+  light background, so it is `#eae7e6`.
+- ⚠️ Non-text colours must be tokens. Five were hardcoded in CSS modules and
+  stayed dark in light mode until fixed (toggle borders, grid cell borders, the
+  writing-list divider, image placeholders). The play button over the video
+  poster keeps fixed white-on-scrim — it sits on a photograph, not the page.
+- `components/ThemeToggle.jsx` holds **no React state**: both icons always
+  render and CSS picks one off `[data-theme]`, so server and client markup
+  match. Deriving the icon from stored theme during render hydration-mismatches.
+  `Header` returns the toggle alone on the homepage (which has no header bar).
+- No-flash: a **synchronous inline `<script>` in `<head>`** in `layout.jsx`
+  reads localStorage (falling back to `prefers-color-scheme`, then dark).
+  `next/script` with `beforeInteractive` and a `useEffect` both run too late.
+  `<html>` carries `suppressHydrationWarning` since the script mutates it.
+- ⚠️ A blanket `img { filter: none }` guard is **not usable** — FilmRoll's focus
+  falloff legitimately blurs off-centre frames. The invariant is instead: no
+  `[data-theme]` selector may set a filter on an image. Verified by
+  pixel-diffing the same photo regions across themes (grid thumbnails, roll
+  frame, home hero — max channel delta 0) and by walking every image's ancestor
+  chain for `filter`/`mix-blend-mode`.
 
 ### Work case studies — row-based layout system
 
@@ -140,9 +174,21 @@ UUID in its path: Format mints a fresh UUID per placement, so the same photo
 carries different UUIDs in different galleries. Keying on the UUID silently
 misses three of the seven teasers.
 
+**Navigation.** `components/GalleryScreen.jsx` owns the view mode so that both
+the viewer and the "Next" link see it (`GalleryViewer` is controlled). The mode
+travels across gallery navigation as `?view=grid`, read after mount rather than
+from server `searchParams` — the latter would opt the route out of static
+generation and drop the images from the prerendered HTML. The nav is shared by
+both modes; its links and the roll toolbar's Next link all use the same
+12px/0.04em treatment. Roll mode carries an extra Next link in its toolbar
+because the roll is up to 781px tall and its wheel handler claims vertical
+scroll, making the foot-of-page nav hard to reach from there.
+
 `lib/gallery.js` — `galleryFiles(slug)` is the single source of truth for image
-order (both modes read it); `teaserFile(slug)` backs the "Next" link;
-`placedFiles(slug)` backs the gallery page's unused-image check.
+order (both modes read it); `teaserFile(slug)` decides which trailing frame is
+the next-gallery preview and excludes it; `placedFiles(slug)` backs the gallery
+page's unused-image check. The teaser is no longer *displayed* anywhere — the
+"Next" link is text-only.
 
 ### Writing list
 
@@ -174,8 +220,8 @@ Redirects (`next.config.mjs`): legacy numeric URLs (`/14358097` etc.) → `/arch
 ## NOT done yet (known TODOs)
 
 1. **Image optimization** — `next.config.mjs` has `images.unoptimized: true` and
-   images are the raw 3–5 MB scraped originals (226 MB across 102 files in
-   `public/images`). Grid mode now loads every image in a gallery at once, so
+   images are the raw 3–5 MB scraped originals (209 MB across 96 files in
+   `public/images`), including three 1.2–2.3 MB writing-list thumbnails. Grid mode now loads every image in a gallery at once, so
    this bites harder than it used to. Before production: enable Next/Vercel
    image optimization or add a resize/compress step, and switch `<img>` →
    `next/image` where sensible.
@@ -192,11 +238,7 @@ Redirects (`next.config.mjs`): legacy numeric URLs (`/14358097` etc.) → `/arch
    200), so the documentary video will not play until its embed privacy is
    changed on Vimeo, or an unlisted hash (`&h=…`) is added to the URL. The
    click-to-play mechanism itself is verified working.
-6. **10 dead image files** — `public/images/archive-0.jpg` … `archive-9.jpg`
-   are the scrape of the `/archive` listing page itself; the rebuild derives
-   listing covers from each gallery's first image instead, so nothing
-   references them. Safe to delete.
-7. **Text proofreading** — body text is auto-extracted from scraped markdown via
+6. **Text proofreading** — body text is auto-extracted from scraped markdown via
    a minimal md→html renderer (`lib/markdown.js`). Not proofread; essay
    bibliographies especially need a pass. Case-study and gallery images now have
    real `alt` text, but blog/documentary/archive-listing images do not.
@@ -235,16 +277,18 @@ Redirects (`next.config.mjs`): legacy numeric URLs (`/14358097` etc.) → `/arch
 
 ```
 app/
-  globals.css              # design tokens (--maxw-content, --maxw-case, …)
-  layout.jsx               # fonts + Header/Footer shell
+  globals.css              # design tokens + dark/light palettes ([data-theme])
+  layout.jsx               # fonts, Header/Footer shell, pre-paint theme script
   work/page.jsx            # card-grid index (server) + WorkIndex.jsx (client toggle)
   work/[slug]/page.jsx     # slug → row composition (ROW_LAYOUTS)
   work/[slug]/cases/       # one file per case study, composed from components/case
-  archive/[slug]/page.jsx  # renders GalleryViewer
+  archive/[slug]/page.jsx  # renders GalleryScreen
 components/
   Header.jsx / Footer.jsx
+  ThemeToggle.jsx          # light/dark switch, no React state (client)
   ArchiveList.jsx          # hover-preview archive listing (client)
-  GalleryViewer.jsx        # mode + current-index state, toolbar, toggle (client)
+  GalleryScreen.jsx        # owns view mode + gallery nav, ?view=grid (client)
+  GalleryViewer.jsx        # controlled mode, current-index, toolbar (client)
   FilmRoll.jsx             # snap carousel, wheel remap, focus falloff (client)
   GalleryGrid.jsx          # masonry thumbnail sheet (client)
   VimeoEmbed.jsx           # poster-first click-to-play embed (client)
@@ -258,7 +302,7 @@ lib/
 scripts/
   test-film-roll.mjs       # CDP harness: sizing, snap, falloff, grid, --flicks
 content/                   # scraped *.md (raw; chrome stripped at render time)
-public/images/             # 102 downloaded originals (UNOPTIMIZED, 226 MB)
+public/images/             # 96 images (UNOPTIMIZED, 209 MB)
 next.config.mjs            # redirects + images.unoptimized
 ```
 
