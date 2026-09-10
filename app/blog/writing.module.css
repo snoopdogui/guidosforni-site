@@ -10,8 +10,28 @@
   margin: 0 0 40px;
 }
 .item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
   padding: 22px 0;
   border-top: 1px solid #1a1a1a;
+}
+.thumbWrap {
+  flex-shrink: 0;
+  display: block;
+  width: 53px;
+  height: 53px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.text {
+  display: flex;
+  flex-direction: column;
 }
 .title {
   font-family: var(--font-display);
