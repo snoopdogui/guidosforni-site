@@ -33,9 +33,29 @@ export const metadata = {
   description: 'Work, documentary, photography and writing by Guido Sforni.',
 };
 
+// Applies the stored theme before first paint, so there's no flash of the
+// wrong palette. This has to be a plain inline <script> in <head>, executed
+// synchronously — next/script's beforeInteractive still runs after the initial
+// paint for this purpose, and a useEffect in a client component runs later
+// still. The pages are statically generated, so the server cannot know the
+// theme; the attribute is set here and <html> is marked
+// suppressHydrationWarning because React would otherwise flag the mismatch.
+const themeInit = `(function(){try{var t=localStorage.getItem('theme');
+if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}
+document.documentElement.setAttribute('data-theme',t);}catch(e){
+document.documentElement.setAttribute('data-theme','dark');}})();`;
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${franklin.variable} ${hanken.variable}`}>
+    <html
+      lang="en"
+      data-theme="dark"
+      suppressHydrationWarning
+      className={`${franklin.variable} ${hanken.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      </head>
       <body>
         <Header />
         <main>{children}</main>

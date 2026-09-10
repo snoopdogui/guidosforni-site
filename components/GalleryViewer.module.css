@@ -17,13 +17,29 @@
   font-variant-numeric: tabular-nums;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nextLink {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.nextLink:hover {
+  color: var(--text-bright);
+}
+
 .toggle {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   appearance: none;
   background: none;
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--border);
   border-radius: 2px;
   padding: 5px 10px;
   font: inherit;
@@ -34,7 +50,7 @@
 }
 .toggle:hover {
   color: var(--text-bright);
-  border-color: #4a4a4a;
+  border-color: var(--border-hover);
 }
 .toggle svg {
   display: block;

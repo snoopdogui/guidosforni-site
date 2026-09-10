@@ -13,7 +13,7 @@
 .toggle {
   appearance: none;
   background: none;
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--border);
   border-radius: 2px;
   padding: 5px 12px;
   font: inherit;
@@ -24,11 +24,11 @@
 }
 .toggle:hover {
   color: var(--text-bright);
-  border-color: #444;
+  border-color: var(--border-hover);
 }
 .toggle[aria-pressed='true'] {
   color: var(--text-bright);
-  border-color: #6a6a6a;
+  border-color: var(--border-active);
 }
 
 /* --- Card grid --- */
@@ -55,7 +55,7 @@
   object-fit: cover;
   display: block;
   margin-bottom: 12px;
-  background: #111;
+  background: var(--surface);
 }
 .cardLink:hover .thumb {
   opacity: 0.82;

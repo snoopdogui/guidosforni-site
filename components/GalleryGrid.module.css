@@ -32,7 +32,7 @@
   line-height: 0; /* no descender gap under the image */
 }
 .pick:hover {
-  border-color: #4a4a4a;
+  border-color: var(--border-hover);
 }
 .pick:focus-visible {
   outline: 1px solid var(--text-bright);

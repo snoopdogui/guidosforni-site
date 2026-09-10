@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import Link from 'next/link';
 import FilmRoll from './FilmRoll';
 import GalleryGrid from './GalleryGrid';
 import styles from './GalleryViewer.module.css';
@@ -28,18 +29,30 @@ function GridIcon() {
 
 // Scroll mode (FilmRoll) and grid mode (GalleryGrid) over one gallery, sharing
 // a current-frame index so switching either way keeps your place.
-export default function GalleryViewer({ files, title }) {
-  const [mode, setMode] = useState('roll');
+//
+// `mode` is controlled by the parent (GalleryScreen) because the "Next" link
+// has to render the same mode into its href — the mode outlives this component.
+export default function GalleryViewer({
+  files,
+  title,
+  mode = 'roll',
+  onModeChange,
+  nextHref,
+  nextTitle,
+}) {
   const [index, setIndex] = useState(0);
 
   // FilmRoll reports its centred frame as you scroll
   const handleActive = useCallback((i) => setIndex(i), []);
 
   // grid pick: remember the frame, then reopen the roll centred on it
-  const handlePick = useCallback((i) => {
-    setIndex(i);
-    setMode('roll');
-  }, []);
+  const handlePick = useCallback(
+    (i) => {
+      setIndex(i);
+      onModeChange?.('roll');
+    },
+    [onModeChange]
+  );
 
   const showingRoll = mode === 'roll';
 
@@ -65,16 +78,28 @@ export default function GalleryViewer({ files, title }) {
             ? `${String(index + 1).padStart(2, '0')} / ${String(files.length).padStart(2, '0')}`
             : `${files.length} images`}
         </p>
-        <button
-          type="button"
-          className={styles.toggle}
-          onClick={() => setMode(showingRoll ? 'grid' : 'roll')}
-          aria-label={showingRoll ? 'Show all images as a grid' : 'Show images as a scrolling roll'}
-          title={showingRoll ? 'Grid' : 'Roll'}
-        >
-          {showingRoll ? <GridIcon /> : <RollIcon />}
-          {showingRoll ? 'Grid' : 'Roll'}
-        </button>
+        <div className={styles.actions}>
+          {/* Roll mode only. The roll is up to 781px tall and its wheel handler
+              claims vertical scroll, so the nav at the foot of the page is hard
+              to reach from here; grid mode scrolls normally and already has it. */}
+          {showingRoll && nextHref && (
+            <Link href={nextHref} className={styles.nextLink}>
+              Next: {nextTitle} ›
+            </Link>
+          )}
+          <button
+            type="button"
+            className={styles.toggle}
+            onClick={() => onModeChange?.(showingRoll ? 'grid' : 'roll')}
+            aria-label={
+              showingRoll ? 'Show all images as a grid' : 'Show images as a scrolling roll'
+            }
+            title={showingRoll ? 'Grid' : 'Roll'}
+          >
+            {showingRoll ? <GridIcon /> : <RollIcon />}
+            {showingRoll ? 'Grid' : 'Roll'}
+          </button>
+        </div>
       </div>
     </>
   );

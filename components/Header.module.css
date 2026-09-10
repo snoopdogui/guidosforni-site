@@ -29,6 +29,12 @@
   color: var(--text);
 }
 
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* Hamburger — hidden on desktop */
 .burger {
   display: none;

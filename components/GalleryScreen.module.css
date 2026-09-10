@@ -1,0 +1,26 @@
+/* Gallery navigation. Lives with GalleryScreen because the "Next" href has to
+   carry the active view mode across the page load.
+
+   Typography is matched to the roll-mode toolbar's Next link
+   (GalleryViewer.module.css .nextLink): 12px, 0.04em tracking, dim -> bright
+   on hover. Both nav links read at the same weight in both view modes. */
+
+.pageNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 30px var(--gutter) 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.back,
+.nextPage {
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.back:hover,
+.nextPage:hover {
+  color: var(--text-bright);
+}

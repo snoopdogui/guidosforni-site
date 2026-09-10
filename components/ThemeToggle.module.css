@@ -1,0 +1,47 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.toggle:hover {
+  color: var(--text-bright);
+  border-color: var(--border-hover);
+}
+.toggle:focus-visible {
+  outline: 1px solid var(--text-bright);
+  outline-offset: 2px;
+}
+.toggle svg {
+  display: block;
+}
+
+/* Which icon shows is driven purely by the theme attribute, so the markup is
+   identical on server and client (no hydration mismatch, no icon flash). */
+.sun {
+  display: block;
+}
+.moon {
+  display: none;
+}
+:global([data-theme='light']) .sun {
+  display: none;
+}
+:global([data-theme='light']) .moon {
+  display: block;
+}
+
+/* Homepage has no header bar — float the toggle over the hero instead. */
+.floating {
+  position: fixed;
+  top: 18px;
+  right: var(--gutter);
+  z-index: 60;
+}

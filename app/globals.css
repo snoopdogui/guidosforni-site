@@ -4,11 +4,23 @@
  * on black; two type families (display + text).
  * ------------------------------------------------------------------ */
 :root {
-  /* Palette */
+  /* Palette — dark is the default and the original design.
+     Ratios below are measured against --bg, not eyeballed. The light theme
+     reproduces these same ratios rather than inverting the hex values. */
   --bg: #000000;
-  --text: #9b9999; /* primary — ~7.6:1 on black (AA) */
-  --text-bright: #d7cccc; /* hover / emphasis */
-  --text-dim: #808080; /* de-emphasized — lifted from original #444 to ~5:1 (AA fix) */
+  --text: #9b9999; /* primary        7.41:1 */
+  --text-bright: #d7cccc; /* hover / emphasis 13.40:1 */
+  --text-dim: #808080; /* de-emphasized   5.32:1 (lifted from the original #444) */
+
+  /* Non-text tones. Previously hardcoded in individual CSS modules; they have
+     to be tokens or the light theme keeps dark borders and panels. */
+  --border: #2a2a2a; /* control outline        1.46:1 */
+  --border-hover: #4a4a4a; /*                       2.37:1 */
+  --border-active: #6a6a6a; /* pressed / selected    3.88:1 */
+  --surface: #0a0a0a; /* image placeholder     1.06:1 */
+  --rule: #1a1a1a; /* hairline divider      1.21:1 */
+
+  color-scheme: dark;
 
   /* Fonts (wired up in layout.jsx via next/font) */
   --font-display: var(--font-hanken), system-ui, sans-serif; /* ≈ Forma DJR Display */
@@ -43,11 +55,38 @@
   --maxw-read: 780px;
 }
 
+/* Light theme. Each value was solved to hit the same contrast ratio against
+   the light background that its dark counterpart hits against black, so the
+   visual hierarchy survives the switch — no mechanical hex inversion.
+   Exception: --surface is deliberately *darker* than --bg here. Mirroring the
+   ratio would put it at #f9f9f9, lighter than the page, but an image
+   placeholder needs to read as recessed on a light background. */
+[data-theme='light'] {
+  --bg: #f4f2f1; /* warm off-white, not pure white */
+  --text: #504e4e; /* 7.41:1 — matches dark */
+  --text-bright: #2a2626; /* 13.41:1 */
+  --text-dim: #676363; /* 5.31:1 */
+
+  --border: #cccaca; /* 1.46:1 */
+  --border-hover: #a19b9b; /* 2.30:1 */
+  --border-active: #7b7979; /* 3.88:1 */
+  --surface: #eae7e6; /* recessed — see note above */
+  --rule: #e1dddd; /* 1.21:1 */
+
+  color-scheme: light;
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
+
+/* NOTE ON IMAGES: photographs must render identically in both themes, so no
+   theme rule may touch img/picture/video. A blanket `filter: none` guard is
+   NOT usable here — FilmRoll's focus falloff legitimately blurs off-centre
+   frames via `filter: blur()`. The invariant is instead: no theme selector
+   ([data-theme=...]) may set filter on an image. Verified in-browser. */
 
 html,
 body {

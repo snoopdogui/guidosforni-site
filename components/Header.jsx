@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { NAV } from '../lib/content';
+import ThemeToggle from './ThemeToggle';
+import toggleStyles from './ThemeToggle.module.css';
 import styles from './Header.module.css';
 
 export default function Header() {
@@ -17,7 +19,9 @@ export default function Header() {
     setOpen(false);
   }, [pathname]);
 
-  if (isHome) return null;
+  // The homepage renders its own name/nav overlay, so there's no header bar —
+  // but the theme toggle has to be available on every page, so float it.
+  if (isHome) return <ThemeToggle className={toggleStyles.floating} />;
 
   return (
     <header className={styles.header}>
@@ -37,16 +41,19 @@ export default function Header() {
         ))}
       </nav>
 
-      <button
-        className={styles.burger}
-        aria-label={open ? 'Close menu' : 'Open menu'}
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span />
-        <span />
-        <span />
-      </button>
+      <div className={styles.tools}>
+        <ThemeToggle />
+        <button
+          className={styles.burger}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </div>
 
       {open && (
         <nav className={styles.overlay} aria-label="Primary mobile">
