@@ -1,6 +1,6 @@
 # Session Notes — guidosforni.com → Next.js migration
 
-_Last updated: 2026-09-08_
+_Last updated: 2026-09-10_
 
 Rebuild of the Format site `guidosforni.com` as a Next.js (App Router) site.
 Source content/images/design-tokens were scraped into `~/guidosforni-scraper/output/`
@@ -56,8 +56,8 @@ Routes (all prerender):
 | `/work/[slug]` | Case study | **Row-based rebuild** of the original Format module layout. All 3 done |
 | `/archive` | Listing | Hover-preview list (client) |
 | `/archive/[slug]` | **Gallery** | Film-roll carousel + masonry grid mode. 9 galleries |
-| `/documentary` | Text page | Morgan's Wave + stills |
-| `/blog` | Listing | 3 essays w/ dates |
+| `/documentary` | Page | Lead image, video-with-text row (click-to-play Vimeo), 2-col masonry |
+| `/blog` | Listing | 3 essays: circular thumbnail + title + date |
 | `/blog/[slug]` | Essay | 780px prose column |
 | `/contact` | Page | mailto link |
 
@@ -121,9 +121,50 @@ toolbar (counter left, toggle right). `FilmRoll` reports its centred frame via
 through a ref on purpose**: mirroring the reported index straight back into
 `initialIndex` creates a feedback loop that yanks the roll mid-gesture.
 
+**Next-gallery teasers.** Format ended most gallery strips with a preview frame
+belonging to the NEXT gallery, rendered larger than the gallery's own photos
+(1057–1327px wide against the usual 720px). `teaserFile(slug)` in
+`lib/gallery.js` identifies it and `galleryFiles(slug)` excludes it, so it
+appears only in the "Next" link — never as a roll frame or grid cell.
+
+Detection is by **asset identity, not position**: the trailing frame counts as a
+teaser only if the same photo also appears in the next gallery's own set. Two
+galleries have none — transcendence and gentle-shifts end on a genuine photo of
+their own — so removing the last frame unconditionally would delete two real
+photographs. Frames per gallery after exclusion: loose-ends 4, ilmuro 5,
+clarity 5, branco 5, soft-guidance 4, transcendence 12, ando 6, higher-land 5,
+gentle-shifts 6 (52 frames + 7 teasers = all 59 gallery files still used).
+
+⚠️ Identity must key on the **source filename** from the CDN URL, not the asset
+UUID in its path: Format mints a fresh UUID per placement, so the same photo
+carries different UUIDs in different galleries. Keying on the UUID silently
+misses three of the seven teasers.
+
 `lib/gallery.js` — `galleryFiles(slug)` is the single source of truth for image
-order (both modes read it); `placedFiles(slug)` backs the gallery page's
-unplaced-image check (currently finds none for any gallery).
+order (both modes read it); `teaserFile(slug)` backs the "Next" link;
+`placedFiles(slug)` backs the gallery page's unused-image check.
+
+### Writing list
+
+Circular thumbnails on `/blog` (`app/blog/writing.module.css`), backed by
+`public/images/blog-<slug>.jpeg`. Two post dates were corrected in `WRITINGS`:
+the-algorithmic-auteur → April 6 2025, does-the-ai-race-produce-security →
+November 24 2024. Those three JPEGs are full-size (1.2–2.3 MB each) and want
+the same resize pass as the rest of `public/images`.
+
+### Documentary
+
+Rebuilt from the captured original (`_4ORMAT_module_video_with_text_04` +
+`image_set_11`) after an earlier revert lost it:
+- full-width lead image, then a 6/6 row — text left, video right
+- `components/VimeoEmbed.jsx` — poster first, iframe (and any request to
+  player.vimeo.com) only after a click. Poster at
+  `public/images/documentary-poster.jpg`
+- masonry image set as a 2-column CSS grid: two landscapes stacked in one
+  column, the portrait in the other, equal `--doc-gap` gutter on both axes,
+  natural aspect ratios. Single column under 768px
+- container is `--maxw-case`, not `--maxw-content` — that's the row box the
+  original used (measured 188/1064 at 1440, 38/692 at 768)
 
 Redirects (`next.config.mjs`): legacy numeric URLs (`/14358097` etc.) → `/archive`;
 `/photography` → `/archive`; `/writing` → `/blog`.
@@ -146,7 +187,16 @@ Redirects (`next.config.mjs`): legacy numeric URLs (`/14358097` etc.) → `/arch
    never scraped. Download it into `public/` and re-point the link.
 4. **Two work date ranges are inferred, not confirmed** — see the comment above
    `WORKS` in `lib/content.js`. Only the arium states a date in its markdown.
-5. **Text proofreading** — body text is auto-extracted from scraped markdown via
+5. **The Vimeo embed returns 401** — `player.vimeo.com/video/769580233` is
+   rejected regardless of referer or user agent (the vimeo.com page itself is
+   200), so the documentary video will not play until its embed privacy is
+   changed on Vimeo, or an unlisted hash (`&h=…`) is added to the URL. The
+   click-to-play mechanism itself is verified working.
+6. **10 dead image files** — `public/images/archive-0.jpg` … `archive-9.jpg`
+   are the scrape of the `/archive` listing page itself; the rebuild derives
+   listing covers from each gallery's first image instead, so nothing
+   references them. Safe to delete.
+7. **Text proofreading** — body text is auto-extracted from scraped markdown via
    a minimal md→html renderer (`lib/markdown.js`). Not proofread; essay
    bibliographies especially need a pass. Case-study and gallery images now have
    real `alt` text, but blog/documentary/archive-listing images do not.
@@ -162,25 +212,20 @@ Redirects (`next.config.mjs`): legacy numeric URLs (`/14358097` etc.) → `/arch
    a curated sequence.
 2. **`soft-guidance` renders 3 columns at 1440**, not 4 — CSS column balancing
    with 5 images and one tall portrait. Cosmetic, inherent to the technique.
-3. **One frame per gallery is smaller than the original.** The last image in
-   loose-ends, ilmuro, clarity, branco, soft-guidance, ando and higher-land was
-   height-capped to 781px on the original site (1057–1327px wide) rather than
-   width-capped to 720px. Under the uniform convention it now renders at 720px.
-   Matching exactly needs per-image sizing data back.
-4. **Gentle scrolls between 40 and ~128 cumulative deltaY still ease back** to
+3. **Gentle scrolls between 40 and ~128 cumulative deltaY still ease back** to
    the starting frame rather than committing. Dropping `COMMIT_FRACTION` to 0.10
    would advance anything above ~85. One-line change if it still feels wrong.
-5. **Nav label inconsistency** — the homepage uses the original section labels
+4. **Nav label inconsistency** — the homepage uses the original section labels
    ("work / documentary / photography / writing"), but the header + canonical nav
    use "Work / Archive / Documentary / Writing / Contact". Decide on one vocabulary.
-6. **Essay text merges** — a few scraped bibliography entries are concatenated
+5. **Essay text merges** — a few scraped bibliography entries are concatenated
    onto one line in the source markdown (e.g. `…FSG originals.Hu, T., …` in
    the-algorithmic-auteur), so they render as one run-on paragraph.
-7. **Archive hover preview** — fixed `aspect-ratio: 3/2` crops portrait covers;
+6. **Archive hover preview** — fixed `aspect-ratio: 3/2` crops portrait covers;
    on first load it statically shows item #1's cover until you hover.
-8. **Header treatment** — original inner pages used a hamburger even on desktop;
+7. **Header treatment** — original inner pages used a hamburger even on desktop;
    the rebuild shows full inline nav on desktop (deliberate a11y improvement).
-9. **Fonts are approximations** — Libre Franklin / Hanken Grotesk are close but
+8. **Fonts are approximations** — Libre Franklin / Hanken Grotesk are close but
    not identical to Benton Sans / Forma DJR; the letter-spaced "GUIDO SFORNI"
    wordmark is hand-tuned, not exact.
 
@@ -202,11 +247,12 @@ components/
   GalleryViewer.jsx        # mode + current-index state, toolbar, toggle (client)
   FilmRoll.jsx             # snap carousel, wheel remap, focus falloff (client)
   GalleryGrid.jsx          # masonry thumbnail sheet (client)
+  VimeoEmbed.jsx           # poster-first click-to-play embed (client)
   case/                    # reusable case-study row components
 lib/
   content.js               # nav + WORKS (slug/title/dates/blurb) / GALLERIES / WRITINGS
   server-content.js        # fs loaders: loadBody(), loadCase(), caseSection(), imagesFor()
-  gallery.js               # galleryFiles(), placedFiles()
+  gallery.js               # galleryFiles(), teaserFile(), placedFiles()
   markdown.js              # tiny md→html
   gallery-layout.json      # captured geometry (now used for image order only)
 scripts/
