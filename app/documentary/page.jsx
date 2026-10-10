@@ -2,7 +2,7 @@ import { loadBody, imagesFor } from '../../lib/server-content';
 import VimeoEmbed from '../../components/VimeoEmbed';
 import styles from './documentary.module.css';
 
-export const metadata = { title: 'Documentary — Guido Sforni' };
+export const metadata = { title: 'Documentary | Guido Sforni' };
 
 const VIMEO_ID = '769580233';
 const VIMEO_PARAMS = 'title=0&byline=0&portrait=0&color=ffffff&api=1&autoplay=1';

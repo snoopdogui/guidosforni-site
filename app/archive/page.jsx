@@ -11,7 +11,7 @@ function cover(slug) {
   return null;
 }
 
-export const metadata = { title: 'Archive — Guido Sforni' };
+export const metadata = { title: 'Archive | Guido Sforni' };
 
 export default function ArchivePage() {
   const items = GALLERIES.map((g) => ({ ...g, href: `/archive/${g.slug}`, cover: cover(g.slug) }));

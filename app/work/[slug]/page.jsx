@@ -23,13 +23,16 @@ export function generateStaticParams() {
   return WORKS.map((w) => ({ slug: w.slug }));
 }
 
-export function generateMetadata({ params }) {
-  const w = getWork(params.slug);
-  return { title: w ? `${w.title} — Guido Sforni` : 'Guido Sforni' };
+// `params` is a Promise in Next 15 and must be awaited before reading slug.
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const w = getWork(slug);
+  return { title: w ? `${w.title} | Guido Sforni` : 'Guido Sforni' };
 }
 
-export default function CaseStudy({ params }) {
-  const w = getWork(params.slug);
+export default async function CaseStudy({ params }) {
+  const { slug } = await params;
+  const w = getWork(slug);
   const RowLayout = w && ROW_LAYOUTS[w.slug];
   if (!RowLayout) notFound();
 
