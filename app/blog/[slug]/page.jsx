@@ -8,13 +8,16 @@ export function generateStaticParams() {
   return WRITINGS.map((w) => ({ slug: w.slug }));
 }
 
-export function generateMetadata({ params }) {
-  const w = getWriting(params.slug);
-  return { title: w ? `${w.title} — Guido Sforni` : 'Guido Sforni' };
+// `params` is a Promise in Next 15 and must be awaited before reading slug.
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const w = getWriting(slug);
+  return { title: w ? `${w.title} | Guido Sforni` : 'Guido Sforni' };
 }
 
-export default function Essay({ params }) {
-  const w = getWriting(params.slug);
+export default async function Essay({ params }) {
+  const { slug } = await params;
+  const w = getWriting(slug);
   if (!w) notFound();
 
   const html = loadBody(`blog-${w.slug}`);

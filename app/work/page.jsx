@@ -2,7 +2,7 @@ import { WORKS } from '../../lib/content';
 import { imagesFor } from '../../lib/server-content';
 import WorkIndex from './WorkIndex';
 
-export const metadata = { title: 'Work — Guido Sforni' };
+export const metadata = { title: 'Work | Guido Sforni' };
 
 export default function WorkPage() {
   // Reuse the case-study image convention: first downloaded image is the lead.

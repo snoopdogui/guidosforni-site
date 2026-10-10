@@ -1,6 +1,6 @@
 import styles from './contact.module.css';
 
-export const metadata = { title: 'Contact — Guido Sforni' };
+export const metadata = { title: 'Contact | Guido Sforni' };
 
 const EMAIL = 'guidosforni@icloud.com';
 
