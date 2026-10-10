@@ -95,6 +95,28 @@
   gap: 32px;
 }
 .row {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 0 var(--gutter);
+  align-items: start;
+  max-width: 820px;
+}
+.rowCover {
+  display: block;
+}
+.rowCover:empty {
+  display: none; /* no clip and no image: the text takes the row */
+}
+.rowCover:empty + .rowText {
+  grid-column: 1 / -1;
+}
+.rowCover .thumb {
+  margin-bottom: 0;
+}
+.rowCover:hover .thumb {
+  opacity: 0.82;
+}
+.rowText {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -112,5 +134,8 @@
   .grid {
     grid-template-columns: 1fr;
     gap: 40px;
+  }
+  .row {
+    grid-template-columns: 112px minmax(0, 1fr);
   }
 }
