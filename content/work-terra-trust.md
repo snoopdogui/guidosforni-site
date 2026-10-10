@@ -23,4 +23,4 @@ Consent withdrawal turned out to be a differencing attack in its own right. If a
 
 Writing the expected outcomes from the threat model, before looking at what the engine did, mattered. And the reference validator caught a mistake in my own data card that I would not have spotted by eye.
 
-Try it → [terra-trust-beta.vercel.app](https://terra-trust-beta.vercel.app) · Code → [github.com/snoopdogui/terra-trust](https://github.com/snoopdogui/terra-trust)
+Try it → terra-trust-beta.vercel.app · Code → github.com/snoopdogui/terra-trust
